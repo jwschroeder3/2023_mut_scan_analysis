@@ -1,0 +1,10 @@
+name: mutscan
+channels:
+    - conda-forge
+    - bioconda
+    - defaults
+dependencies:
+    - python
+    - numpy
+    - pandas
+    - statsmodels
