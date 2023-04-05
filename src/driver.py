@@ -62,19 +62,12 @@ def main():
 
     all_files = glob.glob(os.path.join(in_direc, f"*_{read_class}.tsv"))
 
-    mdead_files = h.filter_files(all_files, phenotypes[1])
+
     ldead_files = h.filter_files(all_files, phenotypes[0])
     wt_files = h.filter_files(all_files, phenotypes[2])
     input_files = h.filter_files(all_files, "Input")
 
-    mdead_data = h.read_data_to_dict(
-        mdead_files,
-        regions,
-        reps,
-        region_key,
-        "mdead",
-        row_aa_lut,
-    )
+
     ldead_data = h.read_data_to_dict(
         ldead_files,
         regions,
@@ -104,11 +97,6 @@ def main():
     for reg,reg_info in input_data.items():
         ref_aa.extend(list(reg_info["ref_aa"]))
 
-    mdead_enrichment = h.get_enrichments(
-        mdead_data,
-        input_data,
-        "larger",
-    )
     ldead_enrichment = h.get_enrichments(
         ldead_data,
         input_data,
@@ -121,10 +109,7 @@ def main():
     )
 
     aa_row_lut = {row_idx:aa for aa,row_idx in row_aa_lut.items()}
-    mdead_rats,mdead_rat_var,mdead_pvals,mdead_p_var = h.get_array(
-        mdead_enrichment,
-        len(aa_row_lut),
-    )
+
     ldead_rats,ldead_rat_var,ldead_pvals,ldead_p_var = h.get_array(
         ldead_enrichment,
         len(aa_row_lut),
@@ -156,24 +141,6 @@ def main():
     out_fname = f"output/wt_Single_BH.csv"
     write_to_file(out_fname, wt_q, header, ref_aa)
  
-    out_fname = f"output/mdead_Single_ratios.csv"
-    write_to_file(out_fname, mdead_rats, header, ref_aa)
-    out_fname = f"output/mdead_Single_ratios_log.csv"
-    mdead_rats[mdead_rats < 1.0] = 1.0
-    mdead_log_rats = np.log2(mdead_rats)
-    write_to_file(out_fname, mdead_log_rats, header, ref_aa)
-    out_fname = f"output/mdead_Single_ratio_variance.csv"
-    write_to_file(out_fname, mdead_rat_var, header, ref_aa)
-    out_fname = f"output/mdead_Single_pvals.csv"
-    write_to_file(out_fname, mdead_pvals, header, ref_aa)
-    out_fname = f"output/mdead_Single_pval_variance.csv"
-    write_to_file(out_fname, mdead_p_var, header, ref_aa)
-    p_vals = mdead_pvals.flatten()
-    p_vals[np.isnan(p_vals)] = 1
-    mdead_bh = multipletests(p_vals, method="fdr_bh")[1]
-    mdead_q = np.reshape(mdead_bh, arr_shape)
-    out_fname = f"output/mdead_Single_BH.csv"
-    write_to_file(out_fname, mdead_q, header, ref_aa)
  
     out_fname = f"output/ldead_Single_ratios.csv"
     write_to_file(out_fname, ldead_rats, header, ref_aa)
